@@ -118,7 +118,6 @@ def rotate_df(param_df, rotate_angle):
 def calculate_coord(fi_start, sector_angle, r_min, r_max, radial_num_pts, theta_num_pts, x_coord):
     fi_start_rad = fi_start * np.pi / 180
     sector_angle_rad = sector_angle * np.pi / 180
-    fi_end_rad = (fi_start + sector_angle) * np.pi / 180
     df = pd.DataFrame(columns=['R','fi', 'x', 'y', 'z'])
 
     radius = list()
@@ -141,9 +140,24 @@ def calculate_coord(fi_start, sector_angle, r_min, r_max, radial_num_pts, theta_
 
     return df
 
+# Определение температуры в точках выходного DataFrame
+def get_temperature(input_df, output_df, search_rad = 0.005):
+    temperature = list()
 
-def get_temperature(input_df, output_df):
-    temperature = pd.Series()
+    for param in output_df.iterrows():
+        df = param_df.copy()
+        df.insert(0, "distance", round(((df['y'] - param[1]['y'])**2 + (df['z'] - param[1]['z'])**2)**0.5, 8))
+        df = df[df["distance"].between(0.0, search_rad)].sort_values(["distance"])
+
+        if len(df["distance"].tolist()) > 4:
+            df = df.head(4)
+
+        temperature.append(df["total-temperature"].mean())
+
+    output_df.insert(0, "total-temperature", temperature)
+
+    return output_df
+
 
 
 
@@ -167,12 +181,15 @@ df_param = calculate_coord(fi_start, sector_angle,
                            radial_num_pts, theta_num_pts,
                            x_coord)
 
+df_param = get_temperature(param_df, df_param)
+
 
 fig = plt.figure()
 ax = fig.add_subplot()
 
-ax.scatter(param_df["z"], param_df["y"], color = "gray", label="input_data", s=2, marker="o")
-ax.scatter(df_param["z"], df_param["y"], color = "red", label="new_coord_data", s=2, marker="o")
+# ax.scatter(param_df["z"], param_df["y"], c = param_df["total-temperature"], cmap = 'jet', label="input-data", s=1, marker="o")
+ax.scatter(df_param["z"], df_param["y"], c = df_param["total-temperature"], cmap = 'jet', label="output-data", s=4, marker="s")
+
 
 plt.show()
 

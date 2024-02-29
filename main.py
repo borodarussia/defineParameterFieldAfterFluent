@@ -45,6 +45,8 @@ class MainWindow(QMainWindow):
         self.save_path_file = QFileDialog.getSaveFileName(self, "Save File", "", "All Files(*);;Excel Files(*.xlsx)")
         if self.save_path_file:
             self.export_field.to_excel(self.save_path_file[0])
+            self.draw_inpt_field()
+            self.draw_color_calc_field()
         else:
             self.show_msg_box_error("Неправильно выполнено сохранение")
 
@@ -87,9 +89,9 @@ class MainWindow(QMainWindow):
                 self.export_field = clear_df(self.export_field)
                 self.draw_inpt_field()
 
-            self.export_field = get_output_data(input_df=self.input_param_field,
-                                                r_min=min(self.input_param_field["R"].tolist()),
-                                                r_max=max(self.input_param_field["R"].tolist()),
+            self.export_field = get_output_data(input_df=self.full_circle_data,
+                                                r_min=min(self.full_circle_data["R"].tolist()),
+                                                r_max=max(self.full_circle_data["R"].tolist()),
                                                 fi_start=float(fi_start),
                                                 sector_angle=float(sector_angle),
                                                 radial_num_pts=int(radial_num_pts),
@@ -112,7 +114,7 @@ class MainWindow(QMainWindow):
                     c=self.full_circle_data[self.parameter_name],
                     cmap='jet',
                     s=1,
-                    alpha=0.01)
+                    alpha=0.05)
         plt.colorbar(orientation="vertical")
         self.canvas.draw()
 
@@ -123,6 +125,16 @@ class MainWindow(QMainWindow):
                     marker="+",
                     s=1,
                     alpha=1)
+        self.canvas.draw()
+
+    def draw_color_calc_field(self):
+        plt.scatter(self.export_field[self.axis["radial"]],
+                    self.export_field[self.axis["theta"]],
+                    c=self.export_field[self.parameter_name],
+                    cmap='jet',
+                    s=2,
+                    alpha=1)
+        plt.colorbar(orientation="vertical")
         self.canvas.draw()
 
     # MessageBox с ошибкой
@@ -176,14 +188,14 @@ def calculate_polar_coord(param_df, radial_axis, theta_axis):
     for i in range(len(coord_x)):
         if coord_x[i] >= 0:
             if coord_y[i] >= 0:
-                fi.append(round(np.atan(coord_y[i] / coord_x[i]), 8))
+                fi.append(round(m.atan(coord_y[i] / coord_x[i]), 8))
             else:
-                fi.append(round(np.atan(coord_y[i] / coord_x[i]) + 2 * np.pi, 8))
+                fi.append(round(m.atan(coord_y[i] / coord_x[i]) + 2 * np.pi, 8))
         else:
             if coord_y[i] >= 0:
-                fi.append(round(np.atan(coord_y[i] / coord_x[i]) + np.pi, 8))
+                fi.append(round(m.atan(coord_y[i] / coord_x[i]) + np.pi, 8))
             else:
-                fi.append(round(np.atan(coord_y[i] / coord_x[i]) + np.pi, 8))
+                fi.append(round(m.atan(coord_y[i] / coord_x[i]) + np.pi, 8))
 
     param_df.insert(1, "fi", fi)
 
@@ -223,21 +235,22 @@ def determine_angles(param_df, percent):
     return (round(min(fi_max) - max(fi_min), 8), max(fi_min), min(fi_max))
 
 # Поворот сектора
-def rotate_df(param_df, rotate_angle, parameter="total-temperature", axial_axis="x", radial_axis="z", theta_axis="y"):
+def rotate_df(param_df, rotate_angle, parameter="total-temperature", axial_axis="x", radial_axis="y", theta_axis="z"):
     df = param_df[[axial_axis, "R", "fi", parameter]].copy()
 
     df["fi"] = df["fi"] + rotate_angle
 
-    df.insert(1, theta_axis, round(param_df[radial_axis] * np.sin(rotate_angle) + param_df[theta_axis] * np.cos(rotate_angle), 8))
-    df.insert(2, radial_axis, round(param_df[radial_axis] * np.cos(rotate_angle) - param_df[theta_axis] * np.sin(rotate_angle), 8))
+    df.insert(1, theta_axis, round(param_df[radial_axis] * np.cos(rotate_angle) + param_df[theta_axis] * np.sin(rotate_angle), 8))
+    df.insert(2, radial_axis, round(param_df[radial_axis] * np.sin(rotate_angle) - param_df[theta_axis] * np.cos(rotate_angle), 8))
 
     return df
 
 # Определение координат
-def calculate_coord(fi_start, sector_angle, r_min, r_max, radial_num_pts, theta_num_pts, x_coord):
+def calculate_coord(fi_start, sector_angle, r_min, r_max, radial_num_pts, theta_num_pts, axial_coord,
+                    axial_axis="x", radial_axis="y", theta_axis="z"):
     fi_start_rad = fi_start * np.pi / 180
     sector_angle_rad = sector_angle * np.pi / 180
-    df = pd.DataFrame(columns=['R','fi', 'x', 'y', 'z'])
+    df = pd.DataFrame(columns=['R','fi', axial_axis, radial_axis, theta_axis])
 
     radius = list()
     for i in range(radial_num_pts):
@@ -250,11 +263,15 @@ def calculate_coord(fi_start, sector_angle, r_min, r_max, radial_num_pts, theta_
     for i in range(len(fi)):
         for j in range(len(radius)):
 
-            y_coord = radius[j] * np.sin(fi[i])
-            z_coord = radius[j] * np.cos(fi[i])
+            radial_coord = radius[j] * np.cos(fi[i])
+            theta_coord = radius[j] * np.sin(fi[i])
 
-            row = {'R': radius[j], 'fi': fi[i],
-                   'x': x_coord, 'y': y_coord, 'z': z_coord}
+            row = {'R': radius[j],
+                   'fi': fi[i],
+                   axial_axis: axial_coord,
+                   radial_axis: radial_coord,
+                   theta_axis: theta_coord}
+
             df.loc[len(df)] = row
 
     return df
@@ -317,9 +334,10 @@ def get_output_data(input_df, fi_start, sector_angle,
                     x_coord=0.0,
                     axial_axis="x", radial_axis="y", theta_axis="z", parameter_name="total-temperature"):
     df = calculate_coord(fi_start, sector_angle,
-                           r_min, r_max,
-                           radial_num_pts, theta_num_pts,
-                           x_coord)
+                         r_min, r_max,
+                         radial_num_pts, theta_num_pts,
+                         x_coord,
+                         axial_axis, radial_axis, theta_axis)
     df = get_temperature(input_df, df, axial_axis, radial_axis, theta_axis, parameter_name)
     return df
 

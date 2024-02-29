@@ -2,10 +2,74 @@ import re
 import pandas as pd
 import math as m
 from openpyxl.workbook import Workbook
+
 import matplotlib.pyplot as plt
-import matplotlib as mpl
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+
+import sys
 import numpy as np
-from scipy.sparse import csr_matrix
+from PyQt5.uic import loadUi
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QDialog, QApplication, QMainWindow, QFileDialog, QMessageBox
+
+
+class MainWindow(QMainWindow):
+    def __init__(self, window = None):
+        super(MainWindow, self).__init__()
+        loadUi("./ui/main_window.ui", self)
+        self.path_file = ""
+        self.pushButton_4.clicked.connect(self.openFile)
+        self.pushButton_3.clicked.connect(self.calculateInputField)
+
+        self.horizontal_layout_4 = QtWidgets.QHBoxLayout(self.frame)
+        self.horizontal_layout_4.setObjectName("horizontal_layout_4")
+        self.figure = plt.figure()
+        self.canvas = FigureCanvas(self.figure)
+        self.horizontal_layout_4.addWidget(self.canvas)
+
+    def openFile(self):
+        self.path_file = QFileDialog.getOpenFileName(self, "Open a file")[0]
+        self.lineEdit_4.setText(str(self.path_file))
+
+    def calculateInputField(self):
+        if self.path_file != "" and self.lineEdit.text() != "" and self.lineEdit_5.text() != "":
+            self.axis = get_axis(str(self.lineEdit.text()))
+            self.parameter_name = str(self.lineEdit_5.text())
+            self.input_param_field = get_input_data(self.path_file,
+                                                    axial_axis=self.axis["axial"],
+                                                    radial_axis=self.axis["radial"],
+                                                    theta_axis=self.axis["theta"])
+
+            self.number_of_sectors = get_sector_num(self.input_param_field, 0.5)
+
+            self.full_circle_data = get_full_circle_input_data(self.input_param_field, self.number_of_sectors,
+                                                               parameter=self.parameter_name,
+                                                               axial_axis=self.axis["axial"],
+                                                               radial_axis=self.axis["radial"],
+                                                               theta_axis=self.axis["theta"])
+
+            self.figure.clear()
+
+            plt.scatter(self.full_circle_data[self.axis["radial"]],
+                        self.full_circle_data[self.axis["theta"]],
+                        c=self.full_circle_data[self.parameter_name],
+                        cmap='jet',
+                        s=2,
+                        alpha=0.01)
+            self.canvas.draw()
+
+        else:
+            self.show_msg_box_error(self, "Не все поля заполнены")
+
+    # MessageBox с ошибкой
+    def show_msg_box_error(self, error_txt):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Critical)
+        msg.setText(error_txt)
+        msg.setWindowTitle("Error")
+        msg.exec_()
+
 
 # Подготовка данных в виде DataFrame для дальнейших расчетов
 def prepare_dataframe(path_file):
@@ -39,11 +103,11 @@ def prepare_dataframe(path_file):
     return param_df
 
 # Определение координат ПСК
-def calculate_polar_coord(param_df):
-    param_df.insert(0, "R", round((param_df["z"]**2 + param_df["y"]**2)**0.5, 8))
+def calculate_polar_coord(param_df, radial_axis, theta_axis):
+    param_df.insert(0, "R", round((param_df[theta_axis]**2 + param_df[radial_axis]**2)**0.5, 8))
 
-    coord_x = param_df["z"].tolist()
-    coord_y = param_df["y"].tolist()
+    coord_x = param_df[radial_axis].tolist()
+    coord_y = param_df[theta_axis].tolist()
     fi = list()
 
     for i in range(len(coord_x)):
@@ -76,7 +140,7 @@ def determine_sector_angle(param_df, percent):
     fi_max = max(sel_params['fi'].tolist())
     fi_min = min(sel_params['fi'].tolist())
 
-    return (fi_min, fi_max, fi_max - fi_min)
+    return np.abs(fi_max - fi_min)
 
 # Определение угла минимального сектора
 def determine_angles(param_df, percent):
@@ -96,23 +160,15 @@ def determine_angles(param_df, percent):
     return (round(min(fi_max) - max(fi_min), 8), max(fi_min), min(fi_max))
 
 # Поворот сектора
-def rotate_df(param_df, rotate_angle):
-    df = param_df[["x", "R", "fi", "total-temperature"]].copy()
+def rotate_df(param_df, rotate_angle, parameter="total-temperature", axial_axis="x", radial_axis="z", theta_axis="y"):
+    df = param_df[[axial_axis, "R", "fi", parameter]].copy()
 
     df["fi"] = df["fi"] + rotate_angle
 
-    df.insert(1, "y", round(param_df["z"] * np.sin(rotate_angle) + param_df["y"] * np.cos(rotate_angle), 8))
-    df.insert(2, "z", round(param_df["z"] * np.cos(rotate_angle) - param_df["y"] * np.sin(rotate_angle), 8))
+    df.insert(1, theta_axis, round(param_df[radial_axis] * np.sin(rotate_angle) + param_df[theta_axis] * np.cos(rotate_angle), 8))
+    df.insert(2, radial_axis, round(param_df[radial_axis] * np.cos(rotate_angle) - param_df[theta_axis] * np.sin(rotate_angle), 8))
 
     return df
-
-# Получение нужного сектора
-# def get_sector_data(param_df, fi_start, sector_angle):
-#     fi_s = fi_start * np.pi / 180
-#     fi_e = (fi_start + sector_angle) * np.pi / 180
-#     df = param_df[param_df["fi"].between(fi_s, fi_e)]
-#
-#     return df
 
 # Определение координат
 def calculate_coord(fi_start, sector_angle, r_min, r_max, radial_num_pts, theta_num_pts, x_coord):
@@ -143,126 +199,88 @@ def calculate_coord(fi_start, sector_angle, r_min, r_max, radial_num_pts, theta_
 # Определение температуры в точках выходного DataFrame
 def get_temperature(input_df, output_df, search_rad = 0.005):
     temperature = list()
-
+    # print(input_df)
     for param in output_df.iterrows():
-        df = param_df.copy()
-        df.insert(0, "distance", round(((df['y'] - param[1]['y'])**2 + (df['z'] - param[1]['z'])**2)**0.5, 8))
-        df = df[df["distance"].between(0.0, search_rad)].sort_values(["distance"])
+        input_df.insert(0, "distance", round(((input_df['y'] - param[1]['y'])**2 + (input_df['z'] - param[1]['z'])**2)**0.5, 8))
+        input_df = input_df.sort_values(["distance"])
 
-        if len(df["distance"].tolist()) > 4:
-            df = df.head(4)
+        temperature.append(input_df.head(4)["total-temperature"].mean())
 
-        temperature.append(df["total-temperature"].mean())
+        input_df.drop("distance", axis= 1 , inplace= True)
 
     output_df.insert(0, "total-temperature", temperature)
 
     return output_df
 
+# Определение исходного датафрейма с которым необходимо работать
+def get_input_data(path_file, axial_axis="x", radial_axis="z", theta_axis="y"):
+    df = prepare_dataframe(path_file)
+    df = calculate_polar_coord(df, radial_axis, theta_axis)
+    return df
+
+# Определение осей в эпюре
+def get_axis(input_text):
+    axis = dict()
+    axis["axial"] = input_text.split(", ")[0]
+    axis["radial"] = input_text.split(", ")[1]
+    axis["theta"] = input_text.split(", ")[2]
+
+    return axis
+
+# Определение количества секторов
+def get_sector_num(df, relative_height_percent):
+    sector_angle = determine_sector_angle(df, relative_height_percent)
+    sector_number = int(2 * np.pi / sector_angle)
+    return sector_number
+
+# Определение полноокружной эпюры
+def get_full_circle_input_data(df, number_of_sectors,
+                               parameter="total-temperature", axial_axis="x", radial_axis="z", theta_axis="y"):
+    full_circle_df = pd.DataFrame()
+    for i in range(number_of_sectors):
+        full_circle_df = full_circle_df._append(rotate_df(df, np.pi * 2 / number_of_sectors * i,
+                                                parameter,
+                                                axial_axis,
+                                                radial_axis,
+                                                theta_axis))
+
+    return full_circle_df
 
 
 
-param_df = prepare_dataframe("./input-data/tvd4_outlet.prof")
-param_df = calculate_polar_coord(param_df)
+app = QApplication(sys.argv)
+main_window = MainWindow()
+main_window.show()
+sys.exit(app.exec_())
 
-fi_min, fi_max, sector_angle = determine_sector_angle(param_df, 0.5)
-
-fi_start = float(285.0)
-sector_angle = float(30.0)
-
-r_min_data = min(param_df["R"].tolist())
-r_max_data = max(param_df["R"].tolist())
-
-radial_num_pts = int(25)
-theta_num_pts = int(25)
-x_coord = float(-0.2753)
-
-df_param = calculate_coord(fi_start, sector_angle,
-                           r_min_data, r_max_data,
-                           radial_num_pts, theta_num_pts,
-                           x_coord)
-
-df_param = get_temperature(param_df, df_param)
-
-
-fig = plt.figure()
-ax = fig.add_subplot()
-
-# ax.scatter(param_df["z"], param_df["y"], c = param_df["total-temperature"], cmap = 'jet', label="input-data", s=1, marker="o")
-ax.scatter(df_param["z"], df_param["y"], c = df_param["total-temperature"], cmap = 'jet', label="output-data", s=4, marker="s")
-
-
-plt.show()
-
-print("complete")
-# print(radius, len(radius))
-# print(r_min_data, r_max_data)
-# print(fi, len(fi))
-# print(fi_start * np.pi / 180, (fi_start + sector_angle) * np.pi / 180)
-
-# param_df = param_df.astype(np.float16)
-# print(param_df.dtypes)
-# x, y = np.meshgrid(param_df["z"].tolist(), param_df["y"].tolist())
-# z = np.meshgrid(param_df["total-temperature"].tolist(), param_df["total-temperature"].tolist())[0]
-
-# fig, dens = plt.subplots()
-# mpl.set_memory_limit(10000)
-# dens.contour(x,y,z)
-# plt.savefig("fig.png")
-# plt.show()
-
-
-
-# z_y_t = [param_df["z"].tolist(),
-#          param_df["y"].tolist(),
-#          param_df["total-temperature"].tolist()]
-
-# z_y_t = [param_df["total-temperature"].tolist()]
-
-# csr_z_y_t = csr_matrix(z_y_t)
-# x, y, t = np.meshgrid(param_df["z"].tolist(), param_df["y"], param_df["total-temperature"].tolist())
-# print(z_y_t[x, y].A[15])
+# param_df = prepare_dataframe("./input-data/prof_Tout_3gor.prof")
+# param_df = calculate_polar_coord(param_df)
 #
-# print(z_y_t[x, y].A[2005])
+# sector_angle = determine_sector_angle(param_df, 0.5)
 #
-# fig, dens = plt.subplots()
-# dens.contourf(x, y, t, levels = 11)
-# plt.show()
+# sector_num = int(2 * np.pi / sector_angle)
+#
+# fi_start = float(285.0)
+# sector_angle = float(32.5)
+# #
+# r_min_data = min(param_df["R"].tolist())
+# r_max_data = max(param_df["R"].tolist())
+# #
+# radial_num_pts = int(25)
+# theta_num_pts = int(25)
+# x_coord = float(-0.2753)
+# #
+# df_param = calculate_coord(fi_start, sector_angle,
+#                            r_min_data, r_max_data,
+#                            radial_num_pts, theta_num_pts,
+#                            x_coord)
+#
+# df_param = get_temperature(param_df, df_param)
+#
+# full_circle_df = pd.DataFrame()
+# for i in range(sector_num):
+#     full_circle_df = full_circle_df._append(rotate_df(param_df, np.pi * 2 / sector_num * i))
 
-
-# rot_param_df_1 = rotate_df(param_df, rotate_angle = sector_angle)
-# rot_param_df_2 = rotate_df(param_df, rotate_angle = sector_angle * 2)
-# rot_param_df_3 = rotate_df(param_df, rotate_angle = sector_angle * 3)
-# rot_param_df_4 = rotate_df(param_df, rotate_angle = sector_angle * 4)
-# rot_param_df_5 = rotate_df(param_df, rotate_angle = sector_angle * 5)
-# rot_param_df_6 = rotate_df(param_df, rotate_angle = sector_angle * 6)
-# rot_param_df_7 = rotate_df(param_df, rotate_angle = sector_angle * 7)
-# rot_param_df_8 = rotate_df(param_df, rotate_angle = sector_angle * 8)
-#
-# number_of_sectors = m.pi * 2 / sector_angle
-#
-# fig = plt.figure()
-# ax = fig.add_subplot()
-# ax.scatter(param_df["z"], param_df["y"], c = param_df["total-temperature"], cmap = 'jet', label="input_data", s=8, marker="o")
-# ax.scatter(rot_param_df_1["z"], rot_param_df_1["y"], c = param_df["total-temperature"], cmap = 'jet', label="input_data", s=8, marker="o")
-# ax.scatter(rot_param_df_2["z"], rot_param_df_2["y"], c = param_df["total-temperature"], cmap = 'jet', label="input_data", s=8, marker="o")
-# ax.scatter(rot_param_df_3["z"], rot_param_df_3["y"], c = param_df["total-temperature"], cmap = 'jet', label="input_data", s=8, marker="o")
-# ax.scatter(rot_param_df_4["z"], rot_param_df_4["y"], c = param_df["total-temperature"], cmap = 'jet', label="input_data", s=8, marker="o")
-# ax.scatter(rot_param_df_5["z"], rot_param_df_5["y"], c = param_df["total-temperature"], cmap = 'jet', label="input_data", s=8, marker="o")
-# ax.scatter(rot_param_df_6["z"], rot_param_df_6["y"], c = param_df["total-temperature"], cmap = 'jet', label="input_data", s=8, marker="o")
-# ax.scatter(rot_param_df_7["z"], rot_param_df_7["y"], c = param_df["total-temperature"], cmap = 'jet', label="input_data", s=8, marker="o")
-# ax.scatter(rot_param_df_8["z"], rot_param_df_8["y"], c = param_df["total-temperature"], cmap = 'jet', label="input_data", s=8, marker="o")
-#
-# plt.show()
-
-# fig = plt.figure()
-# ax = fig.add_subplot(projection='3d')
-# ax.scatter(param_df["z"], param_df["y"], param_df["total-temperature"], label="input_data", s=1.0, marker="o")
-# plt.show()
-#
-# ax = fig.add_subplot()
-# ax.tricontourf(param_df["z"], param_df["y"], param_df["total-temperature"], color="hsv")
-#
-# plt.show()
 
 
 

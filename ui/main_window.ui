@@ -36,11 +36,20 @@
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="1" column="2">
-      <widget class="QLabel" name="label_6">
+     <item row="0" column="0" colspan="5">
+      <widget class="QFrame" name="frame">
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QLineEdit" name="lineEdit_5">
        <property name="text">
-        <string>Название параметра 
-Как в файле с эпюрой</string>
+        <string>total-temperature</string>
        </property>
       </widget>
      </item>
@@ -49,7 +58,7 @@
        <property name="maximumSize">
         <size>
          <width>200</width>
-         <height>40</height>
+         <height>25</height>
         </size>
        </property>
        <property name="text">
@@ -58,8 +67,8 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
-      <widget class="QLineEdit" name="lineEdit">
+     <item row="6" column="0">
+      <widget class="QPushButton" name="pushButton_4">
        <property name="maximumSize">
         <size>
          <width>200</width>
@@ -67,14 +76,47 @@
         </size>
        </property>
        <property name="text">
-        <string>x, y, z</string>
+        <string>Открыть</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="2">
-      <widget class="QLineEdit" name="lineEdit_5">
+     <item row="6" column="1" colspan="2">
+      <widget class="QPushButton" name="pushButton_3">
+       <property name="maximumSize">
+        <size>
+         <width>500</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
-        <string>total-temperature</string>
+        <string>Расчет</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="QLabel" name="label_6">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Название параметра 
+Как в файле с эпюрой</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="4">
+      <widget class="QLabel" name="label_4">
+       <property name="maximumSize">
+        <size>
+         <width>200</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Угол сектора, град.</string>
        </property>
       </widget>
      </item>
@@ -87,6 +129,9 @@
         </size>
        </property>
       </widget>
+     </item>
+     <item row="5" column="3">
+      <widget class="QLineEdit" name="lineEdit_6"/>
      </item>
      <item row="2" column="4">
       <widget class="QLineEdit" name="lineEdit_3">
@@ -103,7 +148,7 @@
        <property name="maximumSize">
         <size>
          <width>200</width>
-         <height>40</height>
+         <height>25</height>
         </size>
        </property>
        <property name="text">
@@ -111,16 +156,58 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="4">
-      <widget class="QLabel" name="label_4">
+     <item row="5" column="4">
+      <widget class="QLineEdit" name="lineEdit_7"/>
+     </item>
+     <item row="11" column="4">
+      <widget class="QPushButton" name="pushButton_2">
        <property name="maximumSize">
         <size>
          <width>200</width>
-         <height>40</height>
+         <height>16777215</height>
         </size>
        </property>
        <property name="text">
-        <string>Угол сектора, град.</string>
+        <string>Экспорт</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLineEdit" name="lineEdit">
+       <property name="maximumSize">
+        <size>
+         <width>200</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>x, y, z</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="4">
+      <widget class="QLabel" name="label_7">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>15</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Окружное направление</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="3">
+      <widget class="QLabel" name="label">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>15</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Радиальное направление</string>
        </property>
       </widget>
      </item>
@@ -134,66 +221,36 @@
        </property>
       </widget>
      </item>
+     <item row="6" column="3">
+      <widget class="QPushButton" name="pushButton">
+       <property name="text">
+        <string>Проверка</string>
+       </property>
+      </widget>
+     </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_5">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>25</height>
+        </size>
+       </property>
        <property name="text">
         <string>Путь к файлу с эпюрой</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="0" colspan="5">
-      <widget class="QFrame" name="frame">
-       <property name="frameShape">
-        <enum>QFrame::StyledPanel</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Raised</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="4">
-      <widget class="QPushButton" name="pushButton_2">
+     <item row="3" column="3" colspan="2">
+      <widget class="QLabel" name="label_8">
        <property name="maximumSize">
         <size>
-         <width>200</width>
-         <height>16777215</height>
+         <width>16777215</width>
+         <height>20</height>
         </size>
        </property>
        <property name="text">
-        <string>Экспорт</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1" colspan="2">
-      <widget class="QPushButton" name="pushButton_3">
-       <property name="maximumSize">
-        <size>
-         <width>500</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Расчет</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QPushButton" name="pushButton_4">
-       <property name="maximumSize">
-        <size>
-         <width>200</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Открыть</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="3">
-      <widget class="QPushButton" name="pushButton">
-       <property name="text">
-        <string>Проверка</string>
+        <string>Количество точек</string>
        </property>
       </widget>
      </item>

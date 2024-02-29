@@ -18,9 +18,15 @@ class MainWindow(QMainWindow):
     def __init__(self, window = None):
         super(MainWindow, self).__init__()
         loadUi("./ui/main_window.ui", self)
+
         self.path_file = ""
-        self.pushButton_4.clicked.connect(self.openFile)
-        self.pushButton_3.clicked.connect(self.calculateInputField)
+        self.input_param_field = pd.DataFrame()
+        self.export_field = pd.DataFrame()
+
+        self.pushButton_4.clicked.connect(self.open_file)
+        self.pushButton_3.clicked.connect(self.calculate_input_field)
+        self.pushButton_2.clicked.connect(self.save_file)
+        self.pushButton.clicked.connect(self.calculate_export_field)
 
         self.horizontal_layout_4 = QtWidgets.QHBoxLayout(self.frame)
         self.horizontal_layout_4.setObjectName("horizontal_layout_4")
@@ -28,12 +34,26 @@ class MainWindow(QMainWindow):
         self.canvas = FigureCanvas(self.figure)
         self.horizontal_layout_4.addWidget(self.canvas)
 
-    def openFile(self):
-        self.path_file = QFileDialog.getOpenFileName(self, "Open a file")[0]
-        self.lineEdit_4.setText(str(self.path_file))
+    def open_file(self):
+        getOpenFile = QFileDialog.getOpenFileName(self, "Open a file")
+        if len(getOpenFile) > 0:
+            self.path_file = getOpenFile[0]
+            if self.path_file:
+                self.lineEdit_4.setText(str(self.path_file))
 
-    def calculateInputField(self):
+    def save_file(self):
+        self.save_path_file = QFileDialog.getSaveFileName(self, "Save File", "", "All Files(*);;Excel Files(*.xlsx)")
+        if self.save_path_file:
+            self.export_field.to_excel(self.save_path_file[0])
+        else:
+            self.show_msg_box_error("Неправильно выполнено сохранение")
+
+    # Определение входного поля
+    def calculate_input_field(self):
         if self.path_file != "" and self.lineEdit.text() != "" and self.lineEdit_5.text() != "":
+            self.input_param_field = pd.DataFrame()
+            self.full_circle_data = pd.DataFrame()
+
             self.axis = get_axis(str(self.lineEdit.text()))
             self.parameter_name = str(self.lineEdit_5.text())
             self.input_param_field = get_input_data(self.path_file,
@@ -48,19 +68,62 @@ class MainWindow(QMainWindow):
                                                                axial_axis=self.axis["axial"],
                                                                radial_axis=self.axis["radial"],
                                                                theta_axis=self.axis["theta"])
-
-            self.figure.clear()
-
-            plt.scatter(self.full_circle_data[self.axis["radial"]],
-                        self.full_circle_data[self.axis["theta"]],
-                        c=self.full_circle_data[self.parameter_name],
-                        cmap='jet',
-                        s=2,
-                        alpha=0.01)
-            self.canvas.draw()
-
+            self.draw_inpt_field()
         else:
-            self.show_msg_box_error(self, "Не все поля заполнены")
+            self.show_msg_box_error("Не все поля заполнены")
+
+    # Подготовка выходного поля
+    def calculate_export_field(self):
+        if (len(self.lineEdit_2.text()) > 0
+                and len(self.lineEdit_3.text()) > 0
+                and len(self.lineEdit_6.text()) > 0
+                and len(self.lineEdit_7.text()) > 0):
+            fi_start = self.lineEdit_2.text()
+            sector_angle = self.lineEdit_3.text()
+            radial_num_pts = self.lineEdit_6.text()
+            theta_num_pts = self.lineEdit_7.text()
+
+            if len(self.export_field.columns) > 0:
+                self.export_field = clear_df(self.export_field)
+                self.draw_inpt_field()
+
+            self.export_field = get_output_data(input_df=self.input_param_field,
+                                                r_min=min(self.input_param_field["R"].tolist()),
+                                                r_max=max(self.input_param_field["R"].tolist()),
+                                                fi_start=float(fi_start),
+                                                sector_angle=float(sector_angle),
+                                                radial_num_pts=int(radial_num_pts),
+                                                theta_num_pts=int(theta_num_pts),
+                                                axial_axis=self.axis["axial"],
+                                                radial_axis=self.axis["radial"],
+                                                theta_axis=self.axis["theta"],
+                                                parameter_name=self.parameter_name)
+
+            self.export_field = self.export_field.sort_values(["R"])
+            self.draw_calc_field()
+        else:
+            self.show_msg_box_error(self, "Введите параметры для определения выходного поля")
+
+    def draw_inpt_field(self):
+        self.figure.clear()
+
+        plt.scatter(self.full_circle_data[self.axis["radial"]],
+                    self.full_circle_data[self.axis["theta"]],
+                    c=self.full_circle_data[self.parameter_name],
+                    cmap='jet',
+                    s=1,
+                    alpha=0.01)
+        plt.colorbar(orientation="vertical")
+        self.canvas.draw()
+
+    def draw_calc_field(self):
+        plt.scatter(self.export_field[self.axis["radial"]],
+                    self.export_field[self.axis["theta"]],
+                    color="red",
+                    marker="+",
+                    s=1,
+                    alpha=1)
+        self.canvas.draw()
 
     # MessageBox с ошибкой
     def show_msg_box_error(self, error_txt):
@@ -70,7 +133,7 @@ class MainWindow(QMainWindow):
         msg.setWindowTitle("Error")
         msg.exec_()
 
-
+#region Func
 # Подготовка данных в виде DataFrame для дальнейших расчетов
 def prepare_dataframe(path_file):
     file_data = str()   # Переменная для информации из файла
@@ -113,14 +176,14 @@ def calculate_polar_coord(param_df, radial_axis, theta_axis):
     for i in range(len(coord_x)):
         if coord_x[i] >= 0:
             if coord_y[i] >= 0:
-                fi.append(round(m.atan(coord_y[i] / coord_x[i]), 8))
+                fi.append(round(np.atan(coord_y[i] / coord_x[i]), 8))
             else:
-                fi.append(round(m.atan(coord_y[i] / coord_x[i]) + 2 * np.pi, 8))
+                fi.append(round(np.atan(coord_y[i] / coord_x[i]) + 2 * np.pi, 8))
         else:
             if coord_y[i] >= 0:
-                fi.append(round(m.atan(coord_y[i] / coord_x[i]) + np.pi, 8))
+                fi.append(round(np.atan(coord_y[i] / coord_x[i]) + np.pi, 8))
             else:
-                fi.append(round(m.atan(coord_y[i] / coord_x[i]) + np.pi, 8))
+                fi.append(round(np.atan(coord_y[i] / coord_x[i]) + np.pi, 8))
 
     param_df.insert(1, "fi", fi)
 
@@ -177,12 +240,12 @@ def calculate_coord(fi_start, sector_angle, r_min, r_max, radial_num_pts, theta_
     df = pd.DataFrame(columns=['R','fi', 'x', 'y', 'z'])
 
     radius = list()
-    for i in range(radial_num_pts + 1):
-        radius.append(r_min + (r_max - r_min) * (i) / (radial_num_pts))
+    for i in range(radial_num_pts):
+        radius.append(r_min + (r_max - r_min) * (i) / (radial_num_pts - 1))
 
     fi = list()
-    for i in range(theta_num_pts + 1):
-        fi.append(fi_start_rad + sector_angle_rad * i / theta_num_pts)
+    for i in range(theta_num_pts):
+        fi.append(fi_start_rad + sector_angle_rad * i / (theta_num_pts - 1))
 
     for i in range(len(fi)):
         for j in range(len(radius)):
@@ -197,18 +260,19 @@ def calculate_coord(fi_start, sector_angle, r_min, r_max, radial_num_pts, theta_
     return df
 
 # Определение температуры в точках выходного DataFrame
-def get_temperature(input_df, output_df, search_rad = 0.005):
+def get_temperature(input_df, output_df,  axial_axis="x", radial_axis="y", theta_axis="z", parameter_name="total-temperature"):
     temperature = list()
     # print(input_df)
     for param in output_df.iterrows():
-        input_df.insert(0, "distance", round(((input_df['y'] - param[1]['y'])**2 + (input_df['z'] - param[1]['z'])**2)**0.5, 8))
+        if "distance" in input_df.columns:
+            input_df.drop("distance", axis=1, inplace=True)
+
+        input_df.insert(0, "distance", round(((input_df[radial_axis] - param[1][radial_axis])**2 + (input_df[theta_axis] - param[1][theta_axis])**2)**0.5, 8))
         input_df = input_df.sort_values(["distance"])
-
-        temperature.append(input_df.head(4)["total-temperature"].mean())
-
+        temperature.append(input_df.head(4)[parameter_name].mean())
         input_df.drop("distance", axis= 1 , inplace= True)
 
-    output_df.insert(0, "total-temperature", temperature)
+    output_df.insert(0, parameter_name, temperature)
 
     return output_df
 
@@ -235,7 +299,7 @@ def get_sector_num(df, relative_height_percent):
 
 # Определение полноокружной эпюры
 def get_full_circle_input_data(df, number_of_sectors,
-                               parameter="total-temperature", axial_axis="x", radial_axis="z", theta_axis="y"):
+                               parameter="total-temperature", axial_axis="x", radial_axis="y", theta_axis="z"):
     full_circle_df = pd.DataFrame()
     for i in range(number_of_sectors):
         full_circle_df = full_circle_df._append(rotate_df(df, np.pi * 2 / number_of_sectors * i,
@@ -246,40 +310,36 @@ def get_full_circle_input_data(df, number_of_sectors,
 
     return full_circle_df
 
+# Получение выходной эпюры
+def get_output_data(input_df, fi_start, sector_angle,
+                    r_min, r_max,
+                    radial_num_pts, theta_num_pts,
+                    x_coord=0.0,
+                    axial_axis="x", radial_axis="y", theta_axis="z", parameter_name="total-temperature"):
+    df = calculate_coord(fi_start, sector_angle,
+                           r_min, r_max,
+                           radial_num_pts, theta_num_pts,
+                           x_coord)
+    df = get_temperature(input_df, df, axial_axis, radial_axis, theta_axis, parameter_name)
+    return df
+
+# Очистка DataFrame
+def clear_df(df):
+    columns_name = list()
+    for column_name in df.columns:
+        columns_name.append(str(column_name))
+
+    for c_name in columns_name:
+        df.drop(columns=c_name)
+
+    return df
+#endregion
 
 
 app = QApplication(sys.argv)
 main_window = MainWindow()
 main_window.show()
 sys.exit(app.exec_())
-
-# param_df = prepare_dataframe("./input-data/prof_Tout_3gor.prof")
-# param_df = calculate_polar_coord(param_df)
-#
-# sector_angle = determine_sector_angle(param_df, 0.5)
-#
-# sector_num = int(2 * np.pi / sector_angle)
-#
-# fi_start = float(285.0)
-# sector_angle = float(32.5)
-# #
-# r_min_data = min(param_df["R"].tolist())
-# r_max_data = max(param_df["R"].tolist())
-# #
-# radial_num_pts = int(25)
-# theta_num_pts = int(25)
-# x_coord = float(-0.2753)
-# #
-# df_param = calculate_coord(fi_start, sector_angle,
-#                            r_min_data, r_max_data,
-#                            radial_num_pts, theta_num_pts,
-#                            x_coord)
-#
-# df_param = get_temperature(param_df, df_param)
-#
-# full_circle_df = pd.DataFrame()
-# for i in range(sector_num):
-#     full_circle_df = full_circle_df._append(rotate_df(param_df, np.pi * 2 / sector_num * i))
 
 
 

@@ -43,10 +43,16 @@ class MainWindow(QMainWindow):
 
     def save_file(self):
         self.save_path_file = QFileDialog.getSaveFileName(self, "Save File", "", "All Files(*);;Excel Files(*.xlsx)")
-        if self.save_path_file:
+        if self.save_path_file and self.lineEdit_8.text() != "" and self.lineEdit_9.text() != "":
+            self.export_field = get_scale_field(self.export_field,
+                                                new_r_max=float(self.lineEdit_8.text()),
+                                                new_r_min=float(self.lineEdit_9.text()),
+                                                radial_axis=self.axis["radial"],
+                                                theta_axis=self.axis["theta"])
+
+
             self.export_field.to_excel(self.save_path_file[0])
-            self.draw_inpt_field()
-            self.draw_color_calc_field()
+
         else:
             self.show_msg_box_error("Неправильно выполнено сохранение")
 
@@ -351,6 +357,21 @@ def clear_df(df):
         df.drop(columns=c_name)
 
     return df
+
+# Отмасштабированная эпюра
+def get_scale_field(df, new_r_max, new_r_min, radial_axis="y", theta_axis="z"):
+    r_max = max(df['R'].tolist())
+    r_min = min(df['R'].tolist())
+    df.insert(0, "relative_height", round((df['R'] - r_min)/(r_max - r_min), 8))
+    # df['R'] = df['relative_height'].apply(lambda x: (new_r_max - new_r_min) * x + new_r_min)
+    df['R'] = (new_r_max - new_r_min) * df['relative_height'] + new_r_min
+    df[radial_axis] = df['R'] * np.cos(df['fi'])
+    df[theta_axis] = df['R'] * np.sin(df['fi'])
+
+    return df
+
+
+
 #endregion
 
 

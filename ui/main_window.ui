@@ -7,19 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>600</height>
+    <height>700</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>800</width>
-    <height>600</height>
+    <height>700</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>800</width>
-    <height>600</height>
+    <height>700</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -32,20 +32,10 @@
       <x>10</x>
       <y>10</y>
       <width>781</width>
-      <height>541</height>
+      <height>561</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0" colspan="5">
-      <widget class="QFrame" name="frame">
-       <property name="frameShape">
-        <enum>QFrame::StyledPanel</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Raised</enum>
-       </property>
-      </widget>
-     </item>
      <item row="4" column="0">
       <widget class="QLineEdit" name="lineEdit">
        <property name="maximumSize">
@@ -59,27 +49,24 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_2">
-       <property name="maximumSize">
-        <size>
-         <width>200</width>
-         <height>25</height>
-        </size>
-       </property>
+     <item row="6" column="4">
+      <widget class="QLineEdit" name="lineEdit_7">
        <property name="text">
-        <string>Порядок осей 
-(Ось, радиальная, окружная)</string>
+        <string>5</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
-      <widget class="QLineEdit" name="lineEdit_4">
+     <item row="6" column="0">
+      <widget class="QLineEdit" name="lineEdit_5">
        <property name="text">
-        <string>prof_Tout_3gor.prof</string>
+        <string>total-temperature</string>
        </property>
-       <property name="readOnly">
-        <bool>true</bool>
+      </widget>
+     </item>
+     <item row="1" column="3" colspan="2">
+      <widget class="QLabel" name="label_11">
+       <property name="text">
+        <string>Радиус</string>
        </property>
       </widget>
      </item>
@@ -97,92 +84,6 @@
        </property>
       </widget>
      </item>
-     <item row="7" column="0">
-      <widget class="QPushButton" name="pushButton_4">
-       <property name="maximumSize">
-        <size>
-         <width>200</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Открыть</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_5">
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>25</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Путь к файлу с эпюрой</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="0">
-      <widget class="QLineEdit" name="lineEdit_5">
-       <property name="text">
-        <string>total-temperature</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLabel" name="label_3">
-       <property name="maximumSize">
-        <size>
-         <width>200</width>
-         <height>25</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Начальный угол, град.</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QLineEdit" name="lineEdit_2">
-       <property name="maximumSize">
-        <size>
-         <width>200</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>0</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="3">
-      <widget class="QLineEdit" name="lineEdit_6">
-       <property name="text">
-        <string>5</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="4">
-      <widget class="QLineEdit" name="lineEdit_7">
-       <property name="text">
-        <string>5</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="3">
-      <widget class="QLabel" name="label">
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>15</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Радиальное направление</string>
-       </property>
-      </widget>
-     </item>
      <item row="5" column="4">
       <widget class="QLabel" name="label_7">
        <property name="maximumSize">
@@ -196,33 +97,6 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="3" colspan="2">
-      <widget class="QLabel" name="label_8">
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>20</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Количество точек</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="3">
-      <widget class="QLineEdit" name="lineEdit_8">
-       <property name="text">
-        <string>200</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="4">
-      <widget class="QLineEdit" name="lineEdit_9">
-       <property name="text">
-        <string>100</string>
-       </property>
-      </widget>
-     </item>
      <item row="2" column="3">
       <widget class="QLabel" name="label_9">
        <property name="text">
@@ -230,43 +104,10 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="4">
-      <widget class="QLabel" name="label_10">
+     <item row="6" column="3">
+      <widget class="QLineEdit" name="lineEdit_6">
        <property name="text">
-        <string>Втулочный</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="3" colspan="2">
-      <widget class="QLabel" name="label_11">
-       <property name="text">
-        <string>Радиус</string>
-       </property>
-      </widget>
-     </item>
-     <item row="12" column="0">
-      <widget class="QPushButton" name="pushButton_3">
-       <property name="maximumSize">
-        <size>
-         <width>500</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Расчет</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QLabel" name="label_4">
-       <property name="maximumSize">
-        <size>
-         <width>200</width>
-         <height>25</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Угол сектора, град.</string>
+        <string>5</string>
        </property>
       </widget>
      </item>
@@ -283,14 +124,90 @@
        </property>
       </widget>
      </item>
-     <item row="7" column="1">
-      <widget class="QPushButton" name="pushButton">
+     <item row="2" column="1">
+      <widget class="QLineEdit" name="lineEdit_2">
+       <property name="maximumSize">
+        <size>
+         <width>200</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
-        <string>Проверка</string>
+        <string>0</string>
        </property>
       </widget>
      </item>
-     <item row="12" column="3" colspan="2">
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_5">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Путь к файлу с эпюрой</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="maximumSize">
+        <size>
+         <width>200</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Порядок осей 
+(Ось, радиальная, окружная)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="4">
+      <widget class="QLineEdit" name="lineEdit_9">
+       <property name="text">
+        <string>100</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLabel" name="label_4">
+       <property name="maximumSize">
+        <size>
+         <width>200</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Угол сектора, град.</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLineEdit" name="lineEdit_4">
+       <property name="text">
+        <string>prof_Tout_3gor.prof</string>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLabel" name="label_3">
+       <property name="maximumSize">
+        <size>
+         <width>200</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Начальный угол, град.</string>
+       </property>
+      </widget>
+     </item>
+     <item row="13" column="3" colspan="2">
       <widget class="QPushButton" name="pushButton_2">
        <property name="maximumSize">
         <size>
@@ -300,6 +217,147 @@
        </property>
        <property name="text">
         <string>Экспорт</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="4">
+      <widget class="QLabel" name="label_10">
+       <property name="text">
+        <string>Втулочный</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="3">
+      <widget class="QLabel" name="label">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>15</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Радиальное направление</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="0">
+      <widget class="QPushButton" name="pushButton_4">
+       <property name="maximumSize">
+        <size>
+         <width>200</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Открыть</string>
+       </property>
+      </widget>
+     </item>
+     <item row="13" column="0">
+      <widget class="QPushButton" name="pushButton_3">
+       <property name="maximumSize">
+        <size>
+         <width>500</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Расчет</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="3">
+      <widget class="QLineEdit" name="lineEdit_8">
+       <property name="text">
+        <string>200</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0" colspan="5">
+      <widget class="QFrame" name="frame">
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="3" colspan="2">
+      <widget class="QLabel" name="label_8">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Количество точек</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="1">
+      <widget class="QPushButton" name="pushButton">
+       <property name="text">
+        <string>Проверка</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="3">
+      <widget class="QLabel" name="label_12">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>15</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>15</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Ср. знач. из файла параметра</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="4">
+      <widget class="QLabel" name="label_13">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>15</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>15</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Требуемое значение параметра</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="3">
+      <widget class="QLineEdit" name="lineEdit_10">
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="4">
+      <widget class="QLineEdit" name="lineEdit_11">
+       <property name="text">
+        <string>1300</string>
        </property>
       </widget>
      </item>

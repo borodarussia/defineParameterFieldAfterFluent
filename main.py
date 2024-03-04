@@ -42,19 +42,26 @@ class MainWindow(QMainWindow):
                 self.lineEdit_4.setText(str(self.path_file))
 
     def save_file(self):
-        self.save_path_file = QFileDialog.getSaveFileName(self, "Save File", "", "All Files(*);;Excel Files(*.xlsx)")
-        if self.save_path_file and self.lineEdit_8.text() != "" and self.lineEdit_9.text() != "":
+        self.save_path_file = str(QFileDialog.getSaveFileName(self, "Save File", "", "Excel Files(*.xlsx)")[0])
+        if (self.save_path_file != ""
+                and self.lineEdit_8.text() != ""
+                and self.lineEdit_9.text() != ""
+                and self.lineEdit_11.text() != ""):
             self.export_field = get_scale_field(self.export_field,
                                                 new_r_max=float(self.lineEdit_8.text()),
                                                 new_r_min=float(self.lineEdit_9.text()),
                                                 radial_axis=self.axis["radial"],
                                                 theta_axis=self.axis["theta"])
 
+            self.need_param = float(self.lineEdit_11.text())
 
-            self.export_field.to_excel(self.save_path_file[0])
-
+            self.export_field[self.parameter_name] = self.export_field[self.parameter_name] * self.need_param / self.average_param
+            self.export_field.to_excel(self.save_path_file)
         else:
-            self.show_msg_box_error("Неправильно выполнено сохранение")
+            self.show_msg_box_error("Заполнены не все поля с параметрами")
+
+
+
 
     # Определение входного поля
     def calculate_input_field(self):
@@ -76,6 +83,9 @@ class MainWindow(QMainWindow):
                                                                axial_axis=self.axis["axial"],
                                                                radial_axis=self.axis["radial"],
                                                                theta_axis=self.axis["theta"])
+
+            self.average_param = self.full_circle_data[self.parameter_name].mean()
+            self.lineEdit_10.setText(str(round(self.average_param, 5)))
             self.draw_inpt_field()
         else:
             self.show_msg_box_error("Не все поля заполнены")
@@ -362,8 +372,12 @@ def clear_df(df):
 def get_scale_field(df, new_r_max, new_r_min, radial_axis="y", theta_axis="z"):
     r_max = max(df['R'].tolist())
     r_min = min(df['R'].tolist())
-    df.insert(0, "relative_height", round((df['R'] - r_min)/(r_max - r_min), 8))
-    # df['R'] = df['relative_height'].apply(lambda x: (new_r_max - new_r_min) * x + new_r_min)
+
+    if "relative_height" in df.columns.values.tolist():
+        df["relative_height"] = round((df['R'] - r_min)/(r_max - r_min), 8)
+    else:
+        df.insert(0, "relative_height", round((df['R'] - r_min)/(r_max - r_min), 8))
+
     df['R'] = (new_r_max - new_r_min) * df['relative_height'] + new_r_min
     df[radial_axis] = df['R'] * np.cos(df['fi'])
     df[theta_axis] = df['R'] * np.sin(df['fi'])

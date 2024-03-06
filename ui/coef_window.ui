@@ -30,13 +30,13 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>761</width>
-     <height>781</height>
+     <width>751</width>
+     <height>776</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout" rowstretch="0,0">
     <property name="sizeConstraint">
-     <enum>QLayout::SetFixedSize</enum>
+     <enum>QLayout::SetMinAndMaxSize</enum>
     </property>
     <item row="1" column="0">
      <layout class="QGridLayout" name="gridLayout_2">
@@ -247,6 +247,26 @@
           <width>16777215</width>
           <height>25</height>
          </size>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="4">
+       <widget class="QLineEdit" name="startAngle"/>
+      </item>
+      <item row="4" column="5">
+       <widget class="QLineEdit" name="sectorAngle"/>
+      </item>
+      <item row="3" column="4">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Начальный угол, град.</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="5">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Угол сектора, град.</string>
         </property>
        </widget>
       </item>

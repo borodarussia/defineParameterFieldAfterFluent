@@ -142,7 +142,7 @@ def calculate_coord(fi_start, sector_angle, r_min, r_max, radial_num_pts, theta_
     return df
 
 # Определение температуры в точках выходного DataFrame
-def get_temperature(input_df, output_df,  axial_axis="x", radial_axis="y", theta_axis="z", parameter_name="total-temperature"):
+def get_parameter(input_df, output_df,  axial_axis="x", radial_axis="y", theta_axis="z", parameter_name="total-temperature"):
     temperature = list()
     # print(input_df)
     for param in output_df.iterrows():
@@ -203,7 +203,7 @@ def get_output_data(input_df, fi_start, sector_angle,
                          radial_num_pts, theta_num_pts,
                          x_coord,
                          axial_axis, radial_axis, theta_axis)
-    df = get_temperature(input_df, df, axial_axis, radial_axis, theta_axis, parameter_name)
+    df = get_parameter(input_df, df, axial_axis, radial_axis, theta_axis, parameter_name)
     return df
 
 # Очистка DataFrame

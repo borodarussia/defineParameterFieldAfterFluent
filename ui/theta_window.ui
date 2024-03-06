@@ -30,16 +30,19 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>761</width>
-     <height>788</height>
+     <width>751</width>
+     <height>773</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout" rowstretch="0,0">
     <property name="sizeConstraint">
-     <enum>QLayout::SetFixedSize</enum>
+     <enum>QLayout::SetMinAndMaxSize</enum>
     </property>
     <item row="1" column="0">
      <layout class="QGridLayout" name="gridLayout_2">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetMinAndMaxSize</enum>
+      </property>
       <item row="8" column="2">
        <widget class="QLineEdit" name="numPtsTheta"/>
       </item>
@@ -307,6 +310,30 @@
         </property>
        </widget>
       </item>
+      <item row="3" column="4">
+       <widget class="QLabel" name="label_11">
+        <property name="text">
+         <string>Начальный угол, град.</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="5">
+       <widget class="QLabel" name="label_12">
+        <property name="text">
+         <string>Угол сектора, град.</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="4">
+       <widget class="QLineEdit" name="startAngle"/>
+      </item>
+      <item row="4" column="5">
+       <widget class="QLineEdit" name="sectorAngle">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item row="0" column="0">
@@ -314,13 +341,13 @@
       <property name="minimumSize">
        <size>
         <width>0</width>
-        <height>500</height>
+        <height>485</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
         <width>16777215</width>
-        <height>500</height>
+        <height>485</height>
        </size>
       </property>
       <property name="frameShape">

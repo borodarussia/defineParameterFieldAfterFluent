@@ -1,28 +1,22 @@
-import re
-import pandas as pd
-import math as m
-from openpyxl.workbook import Workbook
-
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
-
-import sys
-import numpy as np
-
-from PyQt5.uic import loadUi
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QDialog, QApplication, QMainWindow, QFileDialog, QMessageBox, QWidget
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QWidget
 
 from functions import *
 
-class MainWindow(QMainWindow):
+from ui.main_window_ver2 import Ui_MainWindow
+from ui.selector_window import Ui_Form as Ui_SelectorWidget
+from ui.coef_window import Ui_Form as Ui_CoefWidget
+from ui.simple_window import Ui_Form as Ui_SimpleWidget
+from ui.theta_window import Ui_Form as Ui_ThetaWidget
+
+class MainWindow(QMainWindow, Ui_MainWindow):
     '''
     Оснонвая рабочая область приложения.
     '''
-    def __init__(self, window = None):
+    def __init__(self):
         super(MainWindow, self).__init__()
-        loadUi("./ui/main_window_ver2.ui", self)
+        self.setupUi(self)
+        # loadUi("./ui/main_window_ver2.ui", self)
 
         self.coef_window = CoefWindow()
         self.theta_window = ThetaWindow()
@@ -138,13 +132,13 @@ class MainWindow(QMainWindow):
         msg.exec_()
 
 
-class SelectorWindow(QWidget):
+class SelectorWindow(QWidget, Ui_SelectorWidget):
     '''
     Окно с выбором необходимого типа расчета поля распределения
     '''
     def __init__(self):
         super(SelectorWindow, self).__init__()
-        loadUi("./ui/selector_window.ui", self)
+        self.setupUi(self)
         self.field_type = int(1)
         self.rB_theta.toggle()
         self.rB_coef.toggled.connect(self.get_field_export_type)
@@ -160,13 +154,14 @@ class SelectorWindow(QWidget):
             self.field_type = 1
 
 
-class ThetaWindow(QWidget):
+class ThetaWindow(QWidget, Ui_ThetaWidget):
     '''
     Окно с расчетом через Тету
     '''
     def __init__(self):
         super(ThetaWindow, self).__init__()
-        loadUi("./ui/theta_window.ui", self)
+        self.setupUi(self)
+        # loadUi("./ui/theta_window.ui", self)
 
         self.axis = dict()
         self.parameter = ""
@@ -291,13 +286,14 @@ class ThetaWindow(QWidget):
         msg.exec_()
 
 
-class SimpleWindow(QWidget):
+class SimpleWindow(QWidget, Ui_SimpleWidget):
     '''
     Окно с упрощением поля
     '''
     def __init__(self):
         super(SimpleWindow, self).__init__()
-        loadUi("./ui/simple_window.ui", self)
+        self.setupUi(self)
+        # loadUi("./ui/simple_window.ui", self)
 
         self.axis = dict()
         self.parameter = ""
@@ -408,13 +404,14 @@ class SimpleWindow(QWidget):
         msg.exec_()
 
 
-class CoefWindow(QWidget):
+class CoefWindow(QWidget, Ui_CoefWidget):
     '''
     Окно с расчетом через коэффициент
     '''
     def __init__(self):
         super(CoefWindow, self).__init__()
-        loadUi("./ui/coef_window.ui", self)
+        self.setupUi(self)
+        # loadUi("./ui/coef_window.ui", self)
 
         self.axis = dict()
         self.parameter = ""
